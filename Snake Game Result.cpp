@@ -20,7 +20,7 @@ void IniGr();
 void DrawField();
 void PutSnake();
 void DrawSnake();
-void Tick();
+int Tick();
 
 struct Snake
 {
@@ -29,8 +29,43 @@ struct Snake
 
 }s[100];
 
+struct Apple
+{
+public:
+	int x;
+	int y;
+
+	void New()
+	{
+		x = rand() % (N - 2) + 2;
+		y = rand() % (M - 2) + 2;
+
+		for (int i = 0; i < num; i++)
+		{
+			while (x == s[i].x && y == s[i].y)
+			{
+				x = rand() % (N - 2) + 2;
+				y = rand() % (M - 2) + 2;
+			}
+
+		}
+
+		Draw();
+	}
+
+	void Draw()
+	{
+		setcolor(10);
+
+		rectangle(apple.x * Scale, apple.y * Scale, (apple.x + 1) * Scale, (apple.y + 1) * Scale);
+	}
+
+}apple;
+
 int main()
 {
+	srand(time(NULL));
+
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 
@@ -46,18 +81,20 @@ int main()
 		{
 			button = getch();
 
-			if (button == Up)
+			if (button == Up && dir != 3)
 				dir = 1;
-			if (button == Right)
+			if (button == Right && dir != 4)
 				dir = 2;
-			if (button == Down)
+			if (button == Down && dir != 1)
 				dir = 3;
-			if (button == Left)
+			if (button == Left && dir != 2)
 				dir = 4;
 		}
 
-		Tick();
-		Sleep(150);
+		if (Tick() == -1)
+			return 0;
+
+		Sleep(70);
 
 	}
 
@@ -74,11 +111,12 @@ void IniGr()
 	DrawField();
 
 	PutSnake();
+	apple.New();
 
 	return;
 }
 
-void Tick()
+int Tick()
 {
 	for (int i = num; i > 0; i--)
 	{
@@ -95,8 +133,46 @@ void Tick()
 	if (dir == 4)
 		s[0].x -= 1;
 
+	if (s[0].x == apple.x && s[0].y == apple.y)
+	{
+		num++;
+		apple.New();
+	}
+
+	for (int i = 1; i < num; i++)
+	{
+		if (s[0].x == s[i].x && s[0].y == s[i].y)
+		{
+			closegraph();
+			std::cout << "Вы наехали себе на хвост!" << std::endl;
+			std::cout << "Ваш результат = " << num << std::endl;
+			return -1;
+		}
+	}
+
+	if (s[0].y == M)
+	{
+		s[0].y = 0;
+	}
+	else
+	{
+		if (s[0].y == 0)
+			s[0].y = M - 1;
+	}
+
+	if (s[0].x == N)
+	{
+		s[0].x = 0;
+	}
+	else
+	{
+		if (s[0].x == 0)
+			s[0].x = N - 1;
+	}
 
 	DrawSnake();
+
+	return 0;
 
 }
 
@@ -105,6 +181,8 @@ void DrawField()
 	for (int i = 0; i < Height; i += Scale)
 		for (int j = 0; j < Width; j += Scale)
 			rectangle(i, i, j, j);
+
+	return;
 }
 
 void PutSnake()
@@ -114,17 +192,20 @@ void PutSnake()
 		s[i].x = N / 2;
 		s[i].y = M / 2 + i;
 	}
+
+	return;
 }
 
 void DrawSnake()
 {
-	setcolor(5);
+	/*setcolor(3);
 
-	rectangle(s[num].x * Scale, s[num].y * Scale, (s[num].x + 1) * Scale, (s[num].y + 1) * Scale);
-
+	rectangle(s[num].x * Scale, s[num].y * Scale, (s[num].x + 1) * Scale, (s[num].y + 1) * Scale);*/
+	cleardevice();  // !!!
 	setcolor(15);
-
+	apple.Draw();   // !!!
 	for (int i = 0; i < num; i++)
 		rectangle(s[i].x * Scale, s[i].y * Scale, (s[i].x + 1) * Scale, (s[i].y + 1) * Scale);
 
+	return;
 }
